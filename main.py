@@ -248,7 +248,7 @@ class DataProcessor:
         
         # Limpar dados
         df = self.clean_data(df)
-        print(f"Após limpeza: {df.shape[0]} jogadores")
+        print(f"Após limpeza: {df.shape[0]} jogadores (Removidas linhas com muitos valores ausentes)")
         
         # Analisar distribuição original
         if 'Performance' in df.columns:
