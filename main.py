@@ -11,6 +11,7 @@ Implementação seguindo rigorosamente o algoritmo de backpropagation com:
 import pandas as pd
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 class MLPNeuralNetwork:
@@ -248,7 +249,7 @@ class DataProcessor:
         
         # Limpar dados
         df = self.clean_data(df)
-        print(f"Após limpeza: {df.shape[0]} jogadores")
+        print(f"Após limpeza: {df.shape[0]} jogadores (Removidas linhas com muitos valores ausentes)")
         
         # Analisar distribuição original
         if 'Performance' in df.columns:
@@ -584,46 +585,71 @@ class ModelEvaluator:
         return optimal_threshold, optimal_fpr, optimal_tpr
     
     @staticmethod
-    def plot_roc_curve_ascii(fpr, tpr, auc):
+    def plot_roc_curve_matplotlib(fpr, tpr, auc, title="ROC Curve", save_path=None):
         """
-        Plotar curva ROC em ASCII art
+        Plotar curva ROC usando matplotlib
+        
+        Args:
+            fpr: False Positive Rate
+            tpr: True Positive Rate  
+            auc: Area Under Curve
+            title: Título do gráfico
+            save_path: Caminho para salvar o gráfico (opcional)
         """
-        print(f"\n=== CURVA ROC (ASCII) - AUC = {auc:.3f} ===")
+        plt.figure(figsize=(10, 8))
         
-        # Criar grid 20x20 para visualização
-        grid_size = 20
-        grid = [[' ' for _ in range(grid_size + 1)] for _ in range(grid_size + 1)]
-        
-        # Marcar eixos
-        for i in range(grid_size + 1):
-            grid[grid_size][i] = '-'  # Eixo X
-            grid[i][0] = '|'          # Eixo Y
-        
-        grid[grid_size][0] = '+'  # Origem
+        # Plotar curva ROC
+        plt.plot(fpr, tpr, color='darkorange', lw=2, 
+                label=f'ROC Curve (AUC = {auc:.4f})')
         
         # Plotar linha diagonal (classificador aleatório)
-        for i in range(grid_size + 1):
-            x = i
-            y = grid_size - i
-            if 0 <= y <= grid_size:
-                grid[y][x] = '.'
+        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--',
+                label='Random Classifier (AUC = 0.5)')
         
-        # Plotar pontos da curva ROC
-        for i in range(len(fpr)):
-            x = int(fpr[i] * grid_size)
-            y = int((1 - tpr[i]) * grid_size)
-            
-            if 0 <= x <= grid_size and 0 <= y <= grid_size:
-                grid[y][x] = '*'
+        # Encontrar ponto ótimo (mais próximo do canto superior esquerdo)
+        distances = np.sqrt((fpr - 0)**2 + (tpr - 1)**2)
+        optimal_idx = np.argmin(distances)
+        optimal_fpr = fpr[optimal_idx]
+        optimal_tpr = tpr[optimal_idx]
         
-        # Imprimir grid
-        print("TPR")
-        print("1.0 ↑")
-        for row in grid:
-            print("    " + "".join(row))
-        print("    └" + "─" * grid_size + "→ FPR")
-        print("   0.0" + " " * (grid_size-6) + "1.0")
-        print("\nLegenda: * = Curva ROC, . = Linha Aleatória (AUC=0.5)")
+        # Marcar ponto ótimo
+        plt.plot(optimal_fpr, optimal_tpr, 'ro', markersize=8,
+                label=f'Optimal Point (FPR={optimal_fpr:.3f}, TPR={optimal_tpr:.3f})')
+        
+        # Configurar gráfico
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate (1 - Specificity)', fontsize=12)
+        plt.ylabel('True Positive Rate (Sensitivity)', fontsize=12)
+        plt.title(f'{title}\nMLP Neural Network - Basketball Player Performance', fontsize=14)
+        plt.legend(loc="lower right", fontsize=11)
+        plt.grid(True, alpha=0.3)
+        
+        # Adicionar texto com interpretação do AUC
+        if auc >= 0.9:
+            interpretation = "Excellent"
+        elif auc >= 0.8:
+            interpretation = "Good"
+        elif auc >= 0.7:
+            interpretation = "Fair"
+        elif auc >= 0.6:
+            interpretation = "Poor"
+        else:
+            interpretation = "Random/Poor"
+        
+        plt.text(0.6, 0.2, f'Model Performance: {interpretation}', 
+                fontsize=12, bbox=dict(boxstyle="round,pad=0.3", facecolor="lightblue"))
+        
+        plt.tight_layout()
+        
+        # Salvar se especificado
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches='tight')
+            print(f"ROC curve saved to: {save_path}")
+        
+        plt.show()
+        
+        return optimal_fpr, optimal_tpr
     
     @staticmethod
     def print_evaluation_report(metrics, title="Avaliação"):
@@ -742,8 +768,12 @@ def main():
     # Análise detalhada da ROC
     optimal_threshold, optimal_fpr, optimal_tpr = evaluator.print_roc_analysis(fpr, tpr, thresholds, auc, "CURVA ROC - CONJUNTO DE TESTE")
     
-    # Plotar curva ROC em ASCII
-    evaluator.plot_roc_curve_ascii(fpr, tpr, auc)
+    # Plotar curva ROC com matplotlib
+    print(f"\n=== PLOTANDO CURVA ROC COM MATPLOTLIB ===")
+    print("-" * 50)
+    evaluator.plot_roc_curve_matplotlib(fpr, tpr, auc, 
+                                       title="ROC Curve - Test Set", 
+                                       save_path="roc_curve.png")
     
     # 4. ANÁLISE DE IMPORTÂNCIA DAS FEATURES
     print(f"\n=== ANÁLISE DE IMPORTÂNCIA DAS FEATURES ===")
