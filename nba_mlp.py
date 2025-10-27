@@ -12,7 +12,7 @@ def load_and_preprocess_nba_data():
     data = []
     headers = []
     
-    with open('nba_dados_2024.csv', 'r') as f:
+    with open('nba_dados_2024.csv', 'r', encoding='utf-8') as f:
         content = f.read()
         
         # Corrigir o problema da quebra de linha no cabeçalho
@@ -223,6 +223,113 @@ def plot_results(losses, y_train, y_pred_train, y_test, y_pred_test, feature_nam
     print("Gráfico salvo como 'nba_mlp_resultados.png'")
     plt.close()
 
+def calculate_roc_curve(y_true, y_scores):
+    """Calcula a curva ROC manualmente usando apenas NumPy"""
+    y_true = y_true.flatten()
+    y_scores = y_scores.flatten()
+    
+    # Ordenar por scores decrescentes
+    desc_score_indices = np.argsort(y_scores)[::-1]
+    y_scores_sorted = y_scores[desc_score_indices]
+    y_true_sorted = y_true[desc_score_indices]
+    
+    # Calcular thresholds únicos
+    thresholds = np.unique(y_scores_sorted)
+    thresholds = np.append(thresholds, thresholds[-1] - 1)  # Adicionar threshold extra
+    
+    tpr = []  # True Positive Rate (Sensitivity)
+    fpr = []  # False Positive Rate (1 - Specificity)
+    
+    # Calcular TPR e FPR para cada threshold
+    for threshold in thresholds:
+        y_pred = (y_scores >= threshold).astype(int)
+        
+        tp = np.sum((y_true == 1) & (y_pred == 1))
+        fp = np.sum((y_true == 0) & (y_pred == 1))
+        tn = np.sum((y_true == 0) & (y_pred == 0))
+        fn = np.sum((y_true == 1) & (y_pred == 0))
+        
+        # Calcular TPR e FPR
+        tpr_val = tp / (tp + fn) if (tp + fn) > 0 else 0
+        fpr_val = fp / (fp + tn) if (fp + tn) > 0 else 0
+        
+        tpr.append(tpr_val)
+        fpr.append(fpr_val)
+    
+    return np.array(fpr), np.array(tpr), thresholds
+
+def calculate_auc(fpr, tpr):
+    """Calcula a área sob a curva (AUC) usando a regra do trapézio"""
+    # Ordenar por FPR
+    sorted_indices = np.argsort(fpr)
+    fpr_sorted = fpr[sorted_indices]
+    tpr_sorted = tpr[sorted_indices]
+    
+    # Calcular AUC usando regra do trapézio
+    auc = 0
+    for i in range(1, len(fpr_sorted)):
+        auc += (fpr_sorted[i] - fpr_sorted[i-1]) * (tpr_sorted[i] + tpr_sorted[i-1]) / 2
+    
+    return auc
+
+def plot_roc_curve(y_test, y_prob_test):
+    """Criar e salvar gráfico da curva ROC"""
+    print("Calculando curva ROC...")
+    
+    # Calcular curva ROC
+    fpr, tpr, thresholds = calculate_roc_curve(y_test, y_prob_test)
+    
+    # Calcular AUC
+    auc = calculate_auc(fpr, tpr)
+    
+    # Criar gráfico
+    plt.figure(figsize=(10, 8))
+    
+    # Plotar curva ROC
+    plt.plot(fpr, tpr, color='darkorange', lw=3, 
+             label=f'Curva ROC (AUC = {auc:.3f})')
+    
+    # Linha diagonal (classificador aleatório)
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--', 
+             label='Classificador Aleatório (AUC = 0.500)')
+    
+    # Configurações do gráfico
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('Taxa de Falsos Positivos (FPR)', fontsize=14, fontweight='bold')
+    plt.ylabel('Taxa de Verdadeiros Positivos (TPR)', fontsize=14, fontweight='bold')
+    plt.title('Curva ROC - Classificação NBA MLP', fontsize=16, fontweight='bold')
+    plt.legend(loc="lower right", fontsize=12)
+    plt.grid(True, alpha=0.3)
+    
+    # Adicionar informações no gráfico
+    plt.text(0.6, 0.2, f'AUC = {auc:.3f}', fontsize=14, fontweight='bold',
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="lightblue", alpha=0.8))
+    
+    # Interpretar AUC
+    if auc >= 0.9:
+        interpretation = "Excelente"
+    elif auc >= 0.8:
+        interpretation = "Bom"
+    elif auc >= 0.7:
+        interpretation = "Razoável"
+    elif auc >= 0.6:
+        interpretation = "Pobre"
+    else:
+        interpretation = "Falha"
+    
+    plt.text(0.6, 0.1, f'Classificação: {interpretation}', fontsize=12, fontweight='bold',
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="lightyellow", alpha=0.8))
+    
+    # Salvar gráfico
+    plt.tight_layout()
+    plt.savefig('roc_curve.png', dpi=200, bbox_inches='tight')
+    print("Curva ROC salva como 'roc_curve.png'")
+    plt.close()
+    
+    # Retornar métricas
+    return auc, interpretation
+
 def main():
     """Função principal"""
     print("=== MLP para Classificação de Jogadores NBA ===\n")
@@ -298,13 +405,22 @@ def main():
     print(f"\nCriando visualizações...")
     plot_results(losses, y_train, y_pred_train, y_test, y_pred_test, feature_names)
     
+    # Criar curva ROC
+    auc_score, auc_interpretation = plot_roc_curve(y_test, y_prob_test)
+    
+    print(f"\n=== MÉTRICAS ROC ===")
+    print(f"  - AUC Score: {auc_score:.4f}")
+    print(f"  - Interpretação: {auc_interpretation}")
+    
     print(f"\n✅ Análise MLP NBA concluída!")
     print(f"   - Dataset: {X.shape[0]} jogadores NBA")
     print(f"   - Features: {len(feature_names)} estatísticas")
     print(f"   - Arquitetura: {mlp.layers} ({len(mlp.layers)} camadas)")
     print(f"   - Parâmetros: {sum(w.size for w in mlp.weights) + sum(b.size for b in mlp.biases)}")
     print(f"   - Acurácia final: {test_accuracy*100:.1f}%")
+    print(f"   - AUC Score: {auc_score:.3f} ({auc_interpretation})")
     print(f"   - Gráfico salvo: nba_mlp_resultados.png")
+    print(f"   - Curva ROC salva: roc_curve.png")
 
 if __name__ == "__main__":
     main()
