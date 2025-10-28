@@ -36,7 +36,7 @@ Este projeto utiliza uma implementação própria de MLP (sem bibliotecas de mac
 ## Arquivos
 
 - `mlp.py`: Implementação da classe MLP do zero
-- `nba_mlp.py`: Aplicação principal para classificação NBA
+- `main.py`: Aplicação principal para classificação NBA
 - `nba_dados_2024.csv`: Dataset com estatísticas dos jogadores NBA 2024
 - `README.md`: Este arquivo
 
@@ -48,12 +48,12 @@ Este projeto utiliza uma implementação própria de MLP (sem bibliotecas de mac
 source venv/bin/activate
 
 # Ou usar Python diretamente
-python3 nba_mlp.py
+python3 main.py
 ```
 
 ### Execução
 ```bash
-./venv/bin/python nba_mlp.py
+./venv/bin/python main.py
 ```
 
 ## Visualizações Geradas
