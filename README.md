@@ -2,11 +2,11 @@
 
 Uma aplicação de rede neural MLP (Multi-Layer Perceptron) implementada do zero em Python para classificar jogadores da NBA como "Good" ou "Bad" baseado em suas estatísticas de desempenho.
 
-## 🏀 Sobre o Projeto
+## Sobre o Projeto
 
 Este projeto utiliza uma implementação própria de MLP (sem bibliotecas de machine learning) para analisar dados de jogadores da NBA 2024 e classificá-los automaticamente baseado em 26 estatísticas diferentes.
 
-## 📊 Resultados Obtidos
+## Resultados Obtidos
 
 ### Arquitetura da Rede Neural:
 - **4 camadas** total: [26, 16, 8, 1]
@@ -33,12 +33,11 @@ Este projeto utiliza uma implementação própria de MLP (sem bibliotecas de mac
 - **Redução do Loss**: 86.5%
 - **Dataset**: 624 jogadores NBA
 
-## 📁 Arquivos
+## Arquivos
 
 - `mlp.py`: Implementação da classe MLP do zero
 - `nba_mlp.py`: Aplicação principal para classificação NBA
 - `nba_dados_2024.csv`: Dataset com estatísticas dos jogadores NBA 2024
-- `nba_mlp_resultados.png`: Visualizações dos resultados
 - `README.md`: Este arquivo
 
 ## 🚀 Como Executar
@@ -57,7 +56,7 @@ python3 nba_mlp.py
 ./venv/bin/python nba_mlp.py
 ```
 
-## 📈 Visualizações Geradas
+## Visualizações Geradas
 
 O programa gera automaticamente o arquivo `nba_mlp_resultados.png` contendo:
 
@@ -66,7 +65,7 @@ O programa gera automaticamente o arquivo `nba_mlp_resultados.png` contendo:
 3. **Matrizes de Confusão**: Para conjuntos de treino e teste
 4. **Comparação de Acurácias**: Treino vs Teste
 
-## 🧠 Características Técnicas da MLP
+## Características Técnicas da MLP
 
 ### Implementação Própria:
 - **Sem bibliotecas de ML**: Apenas NumPy para operações matemáticas
@@ -99,7 +98,7 @@ O programa gera automaticamente o arquivo `nba_mlp_resultados.png` contendo:
 - `learning_rate`: Taxa de aprendizado (0.01)
 - `epochs`: Número de épocas de treinamento (1500)
 
-## 📊 Dataset NBA
+## Dataset NBA
 
 ### Estatísticas Utilizadas (26 features):
 - **Básicas**: Age, G, GS, MP, PTS
@@ -113,40 +112,19 @@ O programa gera automaticamente o arquivo `nba_mlp_resultados.png` contendo:
 - **Bad**: 570 jogadores (91.7%)
 - **Total**: 624 jogadores
 
-## 🔧 Métodos Principais da MLP
-
-```python
-# Criar MLP
-mlp = MLP(layers=[26, 16, 8, 1], learning_rate=0.01)
-
-# Treinar
-losses = mlp.train(X_train, y_train, epochs=1500)
-
-# Predições
-predictions = mlp.predict(X_test)          # Binário (0/1)
-probabilities = mlp.predict_proba(X_test)  # Probabilidades (0-1)
-```
-
-## 📋 Pré-processamento dos Dados
+## Pré-processamento dos Dados
 
 1. **Limpeza**: Tratamento de valores ausentes e inválidos
 2. **Normalização**: Z-score para todas as features numéricas
 3. **Codificação**: Performance → Good (1) / Bad (0)
 4. **Divisão**: 80% treino / 20% teste (estratificada)
 
-## 🎯 Aplicações Futuras
+## Aplicações Futuras
 
 - **Scouting**: Identificação automática de talentos
 - **Análise de Desempenho**: Avaliação objetiva de jogadores
 - **Mercado**: Suporte para decisões de contratação
 - **Desenvolvimento**: Identificação de áreas de melhoria
-
-## 🔍 Limitações Atuais
-
-- Classificação binária apenas (Good/Bad)
-- Dataset de uma única temporada (2024)
-- Sem consideração de contexto (time, posição específica)
-- Otimizador simples (gradient descent)
 
 ## 🚀 Melhorias Possíveis
 
@@ -157,12 +135,10 @@ probabilities = mlp.predict_proba(X_test)  # Probabilidades (0-1)
 - **Features engineered** (eficiência, clutch performance)
 - **Análise temporal** (múltiplas temporadas)
 
-## 📊 Dependências
+## Dependências
 
 - **NumPy**: Operações matemáticas e arrays
 - **Matplotlib**: Visualizações e gráficos
 - **Python 3.x**: Linguagem base
 
 ---
-
-**Desenvolvido com MLP implementada do zero - Sem frameworks de ML! 🧠⚡**
