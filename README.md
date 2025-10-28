@@ -40,7 +40,7 @@ Este projeto utiliza uma implementação própria de MLP (sem bibliotecas de mac
 - `nba_dados_2024.csv`: Dataset com estatísticas dos jogadores NBA 2024
 - `README.md`: Este arquivo
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 ```bash
@@ -119,14 +119,7 @@ O programa gera automaticamente o arquivo `nba_mlp_resultados.png` contendo:
 3. **Codificação**: Performance → Good (1) / Bad (0)
 4. **Divisão**: 80% treino / 20% teste (estratificada)
 
-## Aplicações Futuras
-
-- **Scouting**: Identificação automática de talentos
-- **Análise de Desempenho**: Avaliação objetiva de jogadores
-- **Mercado**: Suporte para decisões de contratação
-- **Desenvolvimento**: Identificação de áreas de melhoria
-
-## 🚀 Melhorias Possíveis
+## Melhorias Possíveis
 
 - **Classificação multiclasse** (Excelente/Bom/Regular/Ruim)
 - **Otimizadores avançados** (Adam, RMSprop)
